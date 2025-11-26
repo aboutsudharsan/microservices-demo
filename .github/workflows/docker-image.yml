@@ -36,7 +36,6 @@ jobs:
           push: true
           tags: |
             950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:latest
-            950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${{ github.sha }}
 
       # 5️⃣ Update kubeconfig for EKS
       - name: Configure kubectl for EKS
@@ -48,7 +47,6 @@ jobs:
       # 6️⃣ Deploy to EKS using Kubernetes YAML
       - name: Deploy adservice to EKS
         run: |
-          IMAGE=950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${GITHUB_SHA}
           
           # Replace the image in your YAML with the latest commit SHA
           sed -i "s|image: .*|image: $IMAGE|" kubernetes-manifests/adservice.yaml
