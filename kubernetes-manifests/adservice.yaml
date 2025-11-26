@@ -41,7 +41,7 @@ spec:
         runAsUser: 1000
       containers:
       - name: server
-        image: 950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:9aae94596fac31f845d182bb83010d670e0e0e21
+        image: 950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:latest
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
