@@ -38,22 +38,29 @@ jobs:
             950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:latest
             950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${{ github.sha }}
 
-      # 5️⃣ Update kubeconfig for EKS
+      # 5️⃣ Install yq (for safe YAML editing)
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+          yq --version
+
+      # 6️⃣ Update kubeconfig for EKS
       - name: Configure kubectl for EKS
         run: |
           aws eks update-kubeconfig \
             --region us-east-1 \
             --name casual-country-ladybug
 
-      # 6️⃣ Deploy to EKS using unique image tag
+      # 7️⃣ Deploy to EKS using SHA-tagged image
       - name: Deploy adservice to EKS
         run: |
           IMAGE=950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${GITHUB_SHA}
           
-          # Replace image in YAML with commit SHA
-          sed -i "s|image: .*|image: $IMAGE|" kubernetes-manifests/adservice.yaml
+          # Replace image in YAML safely using yq
+          yq eval ".spec.template.spec.containers[0].image = \"$IMAGE\"" -i kubernetes-manifests/adservice.yaml
           
-          # Apply all Kubernetes resources
+          # Apply deployment, service, and service account
           kubectl apply -f kubernetes-manifests/adservice.yaml
           
           # Wait for rollout to complete
