@@ -1,57 +1,60 @@
-name: Deploy Frontend
+name: Build, Push, Deploy to EKS
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  deploy:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      # 1️⃣ Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+      # 2️⃣ Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v2
+      # 3️⃣ Login to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build & Push Image to ECR
-      env:
-        ECR_REGISTRY: 950899811193.dkr.ecr.us-east-1.amazonaws.com
-        ECR_REPOSITORY: san/frontend
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      # 4️⃣ Build and push Docker image to ECR
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/frontend
+          file: ./src/frontend/Dockerfile
+          push: true
+          tags: |
+            950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:latest
+            950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${{ github.sha }}
 
-    - name: Update Kubeconfig
-      run: |
-        aws eks update-kubeconfig --region us-east-1 --name <YOUR_EKS_CLUSTER_NAME>
+      # 5️⃣ Update kubeconfig for EKS
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name casual-country-ladybug
 
-    - name: Delete old secret (if exists)
-      run: |
-        kubectl delete secret ecr-regcred --ignore-not-found=true
-
-    - name: Create new ECR Pull Secret
-      run: |
-        kubectl create secret docker-registry ecr-regcred \
-        --docker-server=950899811193.dkr.ecr.us-east-1.amazonaws.com \
-        --docker-username=AWS \
-        --docker-password="$(aws ecr get-login-password --region us-east-1)"
-
-    - name: Patch Deployment with new image
-      env:
-        IMAGE: 950899811193.dkr.ecr.us-east-1.amazonaws.com/san/frontend:${{ github.sha }}
-      run: |
-        kubectl set image deployment/frontend server=$IMAGE
-
-    - name: Apply manifests (safe – no patching service/serviceAccount)
-      run: |
-        kubectl apply -f kubernetes-manifests/frontend.yaml
+      # 6️⃣ Deploy to EKS using Kubernetes YAML
+      - name: Deploy adservice to EKS
+        run: |
+          IMAGE=950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${GITHUB_SHA}
+          
+          # Replace the image in your YAML with the latest commit SHA
+          sed -i "s|image: .*|image: $IMAGE|" kubernetes-manifests/frontend.yaml
+          
+          # Apply deployment, service, and service account
+          kubectl apply -f kubernetes-manifests/frontend.yaml
+          
+          # Wait for rollout to complete
+          kubectl rollout status deployment/frontend
