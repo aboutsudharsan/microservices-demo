@@ -55,8 +55,7 @@ jobs:
       # 7️⃣ Deploy to EKS using SHA-tagged image
       - name: Deploy adservice to EKS
         run: |
-          IMAGE=950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${GITHUB_SHA}
-          
+          IMAGE=950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${GITHUB_SHA}          
           # Replace image in YAML safely using yq
           yq eval ".spec.template.spec.containers[0].image = \"$IMAGE\"" -i kubernetes-manifests/frontend.yaml
           
