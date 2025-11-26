@@ -61,7 +61,7 @@ jobs:
           yq eval ".spec.template.spec.containers[0].image = \"$IMAGE\"" -i kubernetes-manifests/frontend.yaml
           
           # Apply deployment, service, and service account
-          kubectl apply -f kubernetes-manifests/adservice.yaml
+          kubectl apply -f kubernetes-manifests/frontend.yaml
           
           # Wait for rollout to complete
-          kubectl rollout status deployment/adservice
+          kubectl rollout status deployment/frontend
