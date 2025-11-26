@@ -18,7 +18,7 @@ spec:
     spec:
       serviceAccountName: frontend
 
-      # Tolerations for scheduling
+      # Tolerations for  scheduling
       tolerations:
         - key: "CriticalAddonsOnly"
           operator: "Exists"
