@@ -19,6 +19,7 @@ metadata:
   labels:
     app: adservice
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: adservice
@@ -29,6 +30,12 @@ spec:
     spec:
       serviceAccountName: adservice
       terminationGracePeriodSeconds: 5
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
+          effect: "NoSchedule"
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: general-purpose-cnnl8
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -36,6 +43,7 @@ spec:
         runAsUser: 1000
       containers:
       - name: server
+        image: 950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:latest
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -43,7 +51,6 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: adservice
         ports:
         - containerPort: 9555
         env:
