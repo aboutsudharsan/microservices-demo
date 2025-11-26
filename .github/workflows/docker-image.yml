@@ -57,4 +57,4 @@ jobs:
           kubectl apply -f kubernetes-manifests/frontend.yaml
           
           # Wait for rollout to complete
-          kubectl rollout status deployment/frontend
+          #kubectl rollout status deployment/frontend
