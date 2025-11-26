@@ -16,18 +16,17 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
       serviceAccountName: frontend
-
+      imagePullSecrets:
+        - name: ecr-registry
       tolerations:
         - key: "CriticalAddonsOnly"
           operator: "Exists"
           effect: "NoSchedule"
-
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
-
       containers:
         - name: server
           securityContext:
@@ -40,7 +39,6 @@ spec:
           image: 950899811193.dkr.ecr.us-east-1.amazonaws.com/san/frontend:latest
           ports:
           - containerPort: 8080
-
           readinessProbe:
             initialDelaySeconds: 10
             httpGet:
@@ -49,7 +47,6 @@ spec:
               httpHeaders:
               - name: "Cookie"
                 value: "shop_session-id=x-readiness-probe"
-
           livenessProbe:
             initialDelaySeconds: 10
             httpGet:
@@ -58,7 +55,6 @@ spec:
               httpHeaders:
               - name: "Cookie"
                 value: "shop_session-id=x-liveness-probe"
-
           env:
           - name: PORT
             value: "8080"
@@ -80,7 +76,6 @@ spec:
             value: "shoppingassistantservice:80"
           - name: ENABLE_PROFILER
             value: "0"
-
           resources:
             requests:
               cpu: 100m
@@ -122,4 +117,4 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: frontend              
+  name: frontend
