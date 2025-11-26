@@ -51,10 +51,10 @@ jobs:
           IMAGE=950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${GITHUB_SHA}
           
           # Replace the image in your YAML with the latest commit SHA
-          sed -i "s|image: .*|image: $IMAGE|" kubernetes-manifests/adservice.yaml
+          sed -i "s|image: .*|image: $IMAGE|" kubernetes-manifests/frontend.yaml
           
           # Apply deployment, service, and service account
-          kubectl apply -f kubernetes-manifests/adservice.yaml
+          kubectl apply -f kubernetes-manifests/frontend.yaml
           
           # Wait for rollout to complete
-          kubectl rollout status deployment/adservice
+          kubectl rollout status deployment/frontend
