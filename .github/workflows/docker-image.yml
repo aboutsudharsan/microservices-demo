@@ -58,7 +58,7 @@ jobs:
           IMAGE=950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:${GITHUB_SHA}
           
           # Replace image in YAML safely using yq
-          yq eval ".spec.template.spec.containers[0].image = \"$IMAGE\"" -i kubernetes-manifests/adservice.yaml
+          yq eval ".spec.template.spec.containers[0].image = \"$IMAGE\"" -i kubernetes-manifests/frontend.yaml
           
           # Apply deployment, service, and service account
           kubectl apply -f kubernetes-manifests/adservice.yaml
