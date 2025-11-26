@@ -1,7 +1,7 @@
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
+# You may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
@@ -34,8 +34,6 @@ spec:
         - key: "CriticalAddonsOnly"
           operator: "Exists"
           effect: "NoSchedule"
-      nodeSelector:
-        eks.amazonaws.com/nodegroup: general-purpose-cnnl8
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
