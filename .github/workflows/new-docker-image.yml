@@ -31,8 +31,8 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: ./src/adservice
-          file: ./src/adservice/Dockerfile
+          context: ./src/frontend
+          file: ./src/frontend/Dockerfile
           push: true
           tags: |
             950899811193.dkr.ecr.us-east-1.amazonaws.com/san/demo:latest
